@@ -1,14 +1,30 @@
 from datetime import datetime
+import os
 
 from flask import Flask, render_template, request, url_for, flash, redirect
 from forms import RegistrationForm, LoginForm
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+# app = Flask(__name__)
+# app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 
 
+# db = SQLAlchemy(app)
+if os.environ.get('VERCEL'):
+    app = Flask(__name__, instance_path='/tmp/instance')
+else:
+    app = Flask(__name__)
+
+# 2. Point your SQLite URI to the writeable /tmp/ directory
+if os.environ.get('VERCEL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/expenses.db'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///expenses.db'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# 3. Initialize your database
 db = SQLAlchemy(app)
 
 class Expense(db.Model):
